@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.StyleRes;
-import com.example.gs.mockdialog.MainActivity;
 
 public class MockAlertDialog extends Dialog {
     private MockAlertController mAlert;
@@ -44,6 +43,11 @@ public class MockAlertDialog extends Dialog {
 
         public MockAlertDialog create() {
             final MockAlertDialog dialog = new MockAlertDialog(P.mContext, 0, false);
+            P.apply(dialog.mAlert);
+            dialog.setCancelable(P.mCancelable);
+            if (P.mCancelable) {
+                dialog.setCanceledOnTouchOutside(true);
+            }
             return dialog;
         }
     }

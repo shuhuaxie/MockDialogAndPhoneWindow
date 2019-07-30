@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
     private Window mWindow;
     private View mDecor;
     private LayoutInflater mInflater;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,7 +25,8 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog.Builder normalDialog = new AlertDialog.Builder(
                         MainActivity.this);
                 normalDialog.setMessage("hi");
-                normalDialog.create().show();
+                AlertDialog alertDialog = normalDialog.create();
+                alertDialog.show();
             }
         });
         findViewById(R.id.show_mock_dialog).setOnClickListener(new View.OnClickListener() {
@@ -32,28 +34,29 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-//                MockAlertDialog.Builder mockDialog = new MockAlertDialog.Builder(MainActivity.this);
-//                mockDialog.setMessage("mock hi");
-//                mockDialog.create().show();
-                WindowManager mWindowManager = (WindowManager) MainActivity.this.getSystemService(Context.WINDOW_SERVICE);
+                MockAlertDialog.Builder mockDialog = new MockAlertDialog.Builder(MainActivity.this);
+                mockDialog.setMessage("mock hi");
+                mockDialog.create().show();
 
-                // init
-                final Window w = new MockWindow(MainActivity.this);
-                mWindow = w;
-                w.setWindowManager(mWindowManager, null, null);
-                w.setGravity(Gravity.CENTER);
-                w.setCallback(MainActivity.this);
-
-                // content
-                mInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View contentView = mInflater.inflate(R.layout.mock_dialog,null);
+//                WindowManager mWindowManager = (WindowManager) MainActivity.this.getSystemService(Context.WINDOW_SERVICE);
+//
+//                // init
+//                final Window w = new MockWindow(MainActivity.this);
+//                mWindow = w;
+//                w.setWindowManager(mWindowManager, null, null);
+//                w.setGravity(Gravity.CENTER);
+//                w.setCallback(MainActivity.this);
+//
+//                // content
+//                mInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//                View contentView = mInflater.inflate(R.layout.mock_dialog,null);
 //                w.setContentView(contentView);
-
-                // show
-                mDecor = mWindow.getDecorView();
-//                WindowManager.LayoutParams l = mWindow.getAttributes();
-//                mWindowManager.addView(mDecor, l);
-                mWindowManager.addView(contentView, new WindowManager.LayoutParams());
+//
+//                // show
+//                mDecor = mWindow.getDecorView();
+////                WindowManager.LayoutParams l = mWindow.getAttributes();
+////                mWindowManager.addView(mDecor, l);
+//                mWindowManager.addView(mDecor, new WindowManager.LayoutParams());
             }
         });
     }
