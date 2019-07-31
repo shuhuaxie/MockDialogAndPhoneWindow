@@ -1,5 +1,6 @@
 package com.example.gs.mockdialog.mock;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -12,6 +13,8 @@ import android.widget.FrameLayout;
 public class MockWindow extends Window {
     private MockDecorView mDecor;
     private LayoutInflater mLayoutInflater;
+    private int mTheme = -1;
+
     public MockWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
@@ -192,10 +195,33 @@ public class MockWindow extends Window {
     }
 
     private void installDecor() {
-        mDecor = new MockDecorView(getContext());
-        mDecor.setWindow(this);
+        if (mDecor == null) {
+            mDecor = generateDecor(-1);
+        } else {
+            mDecor.setWindow(this);
+        }
     }
-
+    @SuppressLint("NewApi")
+    protected MockDecorView generateDecor(int featureId) {
+        // System process doesn't have application context and in that case we need to directly use
+        // the context we have. Otherwise we want the application context, so we don't cling to the
+        // activity.
+        Context context;
+//        if (mUseDecorContext) {
+//            Context applicationContext = getContext().getApplicationContext();
+//            if (applicationContext == null) {
+//                context = getContext();
+//            } else {
+//                context = new DecorContext(applicationContext, getContext().getResources());
+//                if (mTheme != -1) {
+//                    context.setTheme(mTheme);
+//                }
+//            }
+//        } else {
+            context = getContext();
+//        }
+        return new MockDecorView(context, featureId, this, getAttributes());
+    }
     @Override
     public View peekDecorView() {
         return null;

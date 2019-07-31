@@ -4,9 +4,9 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 public class MockDecorView extends FrameLayout {
@@ -27,7 +27,11 @@ public class MockDecorView extends FrameLayout {
     public MockDecorView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
-
+    MockDecorView(Context context, int featureId, MockWindow window,
+              WindowManager.LayoutParams params) {
+        super(context);
+        setWindow(window);
+    }
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         final Window.Callback cb = mWindow.getCallback();

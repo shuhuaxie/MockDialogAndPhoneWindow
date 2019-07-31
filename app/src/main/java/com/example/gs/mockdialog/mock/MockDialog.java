@@ -7,8 +7,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
 import android.view.*;
 import android.view.accessibility.AccessibilityEvent;
+import com.example.gs.mockdialog.R;
 
-public class MockDialog implements DialogInterface,KeyEvent.Callback, Window.Callback {
+public class MockDialog implements DialogInterface, KeyEvent.Callback, Window.Callback {
     private final WindowManager mWindowManager;
     protected boolean mCancelable = true;
     final Context mContext;
@@ -28,7 +29,9 @@ public class MockDialog implements DialogInterface,KeyEvent.Callback, Window.Cal
 
     MockDialog(@NonNull Context context, @StyleRes int themeResId, boolean createContextThemeWrapper) {
         if (createContextThemeWrapper) {
-
+            if (themeResId == 0) {
+                themeResId = R.style.MockDialog;
+            }
             mContext = new ContextThemeWrapper(context, themeResId);
         } else {
             mContext = context;
@@ -87,6 +90,12 @@ public class MockDialog implements DialogInterface,KeyEvent.Callback, Window.Cal
         onStart();
         mDecor = mWindow.getDecorView();
         WindowManager.LayoutParams l = mWindow.getAttributes();
+        l.height = -2;
+        l.width = -2;
+        l.flags = 8519682;
+        l.dimAmount = 0.6f;
+//        l.type = 2;
+
         mWindowManager.addView(mDecor, l);
 
         mShowing = true;
@@ -140,6 +149,7 @@ public class MockDialog implements DialogInterface,KeyEvent.Callback, Window.Cal
             cancel();
         }
     }
+
     @Override
     public void cancel() {
 
@@ -178,7 +188,7 @@ public class MockDialog implements DialogInterface,KeyEvent.Callback, Window.Cal
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        return event.dispatch(this,   mDecor != null
+        return event.dispatch(this, mDecor != null
                 ? mDecor.getKeyDispatcherState() : null, this);
     }
 
