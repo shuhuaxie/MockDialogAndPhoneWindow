@@ -5,20 +5,23 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StyleRes;
-import android.util.TypedValue;
 import android.view.*;
+import android.view.accessibility.AccessibilityEvent;
 
-public class MockDialog implements DialogInterface {
+public class MockDialog implements DialogInterface,KeyEvent.Callback, Window.Callback {
     private final WindowManager mWindowManager;
     protected boolean mCancelable = true;
     final Context mContext;
     final Window mWindow;
     private boolean mShowing = false;
     private boolean mCanceled = false;
+    private boolean mCreated = false;
     View mDecor;
+
     public MockDialog(@NonNull Context context) {
         this(context, 0, true);
     }
+
     public MockDialog(@NonNull Context context, @StyleRes int themeResId) {
         this(context, themeResId, true);
     }
@@ -35,22 +38,27 @@ public class MockDialog implements DialogInterface {
 
         final Window w = new MockWindow(mContext);
         mWindow = w;
-//        w.setCallback(this);
+        w.setCallback(this);
 
         w.setWindowManager(mWindowManager, null, null);
         w.setGravity(Gravity.CENTER);
 
     }
-    public final @NonNull Context getContext() {
+
+    public final @NonNull
+    Context getContext() {
         return mContext;
     }
+
     public void setCancelable(boolean flag) {
         mCancelable = flag;
         updateWindowForCancelable();
     }
+
     protected void onCreate(Bundle savedInstanceState) {
-        
+
     }
+
     private void updateWindowForCancelable() {
 //        mWindow.setCloseOnSwipeEnabled(mCancelable);
     }
@@ -60,8 +68,6 @@ public class MockDialog implements DialogInterface {
             mCancelable = true;
             updateWindowForCancelable();
         }
-
-//        mWindow.setCloseOnTouchOutside(cancel);
     }
 
     public void show() {
@@ -75,43 +81,65 @@ public class MockDialog implements DialogInterface {
             return;
         }
         mCanceled = false;
-//        if (!mCreated) {
-//            dispatchOnCreate(null);
-//        } else {
-//            // Fill the DecorView in on any configuration changes that
-//            // may have occured while it was removed from the WindowManager.
-//            final Configuration config = mContext.getResources().getConfiguration();
-//            mWindow.getDecorView().dispatchConfigurationChanged(config);
-//        }
+        if (!mCreated) {
+            dispatchOnCreate(null);
+        }
         onStart();
         mDecor = mWindow.getDecorView();
-//        if (mActionBar == null && mWindow.hasFeature(Window.FEATURE_ACTION_BAR)) {
-//            final ApplicationInfo info = mContext.getApplicationInfo();
-//            mWindow.setDefaultIcon(info.icon);
-//            mWindow.setDefaultLogo(info.logo);
-//            mActionBar = new WindowDecorActionBar(this);
-//        }
         WindowManager.LayoutParams l = mWindow.getAttributes();
-        boolean restoreSoftInputMode = false;
-        if ((l.softInputMode
-                & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == 0) {
-            l.softInputMode |=
-                    WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-            restoreSoftInputMode = true;
-        }
         mWindowManager.addView(mDecor, l);
-        if (restoreSoftInputMode) {
-            l.softInputMode &=
-                    ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-        }
+
         mShowing = true;
 //        sendShowMessage();
+    }
+
+    void dispatchOnCreate(Bundle savedInstanceState) {
+        if (!mCreated) {
+            onCreate(savedInstanceState);
+            mCreated = true;
+        }
     }
 
     private void onStart() {
 
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE) {
+            event.startTracking();
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
+                && event.isTracking()
+                && !event.isCanceled()) {
+            onBackPressed();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+        return false;
+    }
+
+    public void onBackPressed() {
+        if (mCancelable) {
+            cancel();
+        }
+    }
     @Override
     public void cancel() {
 
@@ -122,6 +150,7 @@ public class MockDialog implements DialogInterface {
     public void dismiss() {
         dismissDialog();
     }
+
     void dismissDialog() {
         if (mDecor == null || !mShowing) {
             return;
@@ -140,11 +169,126 @@ public class MockDialog implements DialogInterface {
             mWindow.closeAllPanels();
             onStop();
             mShowing = false;
-
         }
     }
 
     private void onStop() {
+
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return event.dispatch(this,   mDecor != null
+                ? mDecor.getKeyDispatcherState() : null, this);
+    }
+
+    @Override
+    public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchTrackballEvent(MotionEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchGenericMotionEvent(MotionEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        return false;
+    }
+
+    @Override
+    public View onCreatePanelView(int featureId) {
+        return null;
+    }
+
+    @Override
+    public boolean onCreatePanelMenu(int featureId, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onPreparePanel(int featureId, View view, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuOpened(int featureId, Menu menu) {
+        return false;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        return false;
+    }
+
+    @Override
+    public void onWindowAttributesChanged(WindowManager.LayoutParams attrs) {
+
+    }
+
+    @Override
+    public void onContentChanged() {
+
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+
+    }
+
+    @Override
+    public void onPanelClosed(int featureId, Menu menu) {
+
+    }
+
+    @Override
+    public boolean onSearchRequested() {
+        return false;
+    }
+
+    @Override
+    public boolean onSearchRequested(SearchEvent searchEvent) {
+        return false;
+    }
+
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
+        return null;
+    }
+
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+        return null;
+    }
+
+    @Override
+    public void onActionModeStarted(ActionMode mode) {
+
+    }
+
+    @Override
+    public void onActionModeFinished(ActionMode mode) {
 
     }
 }

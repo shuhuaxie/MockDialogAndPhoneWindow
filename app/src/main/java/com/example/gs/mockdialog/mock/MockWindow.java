@@ -5,13 +5,16 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.*;
 import android.widget.FrameLayout;
 
 public class MockWindow extends Window {
-    private FrameLayout mDecor;
+    private MockDecorView mDecor;
+    private LayoutInflater mLayoutInflater;
     public MockWindow(Context context) {
         super(context);
+        mLayoutInflater = LayoutInflater.from(context);
     }
 
     @Override
@@ -31,7 +34,10 @@ public class MockWindow extends Window {
 
     @Override
     public void setContentView(int layoutResID) {
-
+        if (mDecor == null) {
+            installDecor();
+        }
+        mLayoutInflater.inflate(layoutResID, mDecor);
     }
 
     @Override
@@ -186,7 +192,8 @@ public class MockWindow extends Window {
     }
 
     private void installDecor() {
-        mDecor = new FrameLayout(getContext());
+        mDecor = new MockDecorView(getContext());
+        mDecor.setWindow(this);
     }
 
     @Override

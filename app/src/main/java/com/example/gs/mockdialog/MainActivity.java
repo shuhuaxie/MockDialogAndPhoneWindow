@@ -54,9 +54,9 @@ public class MainActivity extends AppCompatActivity {
 //
 //                // show
 //                mDecor = mWindow.getDecorView();
-////                WindowManager.LayoutParams l = mWindow.getAttributes();
-////                mWindowManager.addView(mDecor, l);
-//                mWindowManager.addView(mDecor, new WindowManager.LayoutParams());
+//                WindowManager.LayoutParams l = mWindow.getAttributes();
+//                mWindowManager.addView(mDecor, l);
+//                mWindowManager.addView(contentView, new WindowManager.LayoutParams());
             }
         });
     }
