@@ -5,6 +5,7 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -41,6 +42,13 @@ public class MockDecorView extends FrameLayout {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        final Window.Callback cb = mWindow.getCallback();
+        return cb != null
+                ? cb.dispatchTouchEvent(ev) : super.dispatchTouchEvent(ev);
     }
 
     public void setWindow(MockWindow mockWindow) {

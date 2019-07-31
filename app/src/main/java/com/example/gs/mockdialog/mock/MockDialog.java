@@ -13,7 +13,7 @@ public class MockDialog implements DialogInterface, KeyEvent.Callback, Window.Ca
     private final WindowManager mWindowManager;
     protected boolean mCancelable = true;
     final Context mContext;
-    final Window mWindow;
+    final MockWindow mWindow;
     private boolean mShowing = false;
     private boolean mCanceled = false;
     private boolean mCreated = false;
@@ -39,7 +39,7 @@ public class MockDialog implements DialogInterface, KeyEvent.Callback, Window.Ca
 
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
-        final Window w = new MockWindow(mContext);
+        final MockWindow w = new MockWindow(mContext);
         mWindow = w;
         w.setCallback(this);
 
@@ -71,8 +71,17 @@ public class MockDialog implements DialogInterface, KeyEvent.Callback, Window.Ca
             mCancelable = true;
             updateWindowForCancelable();
         }
+        mWindow.setCloseOnTouchOutside(cancel);
     }
 
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
+        if (mCancelable && mShowing && mWindow.shouldCloseOnTouch(mContext, event)) {
+            cancel();
+            return true;
+        }
+
+        return false;
+    }
     public void show() {
         if (mShowing) {
             if (mDecor != null) {
@@ -92,8 +101,8 @@ public class MockDialog implements DialogInterface, KeyEvent.Callback, Window.Ca
         WindowManager.LayoutParams l = mWindow.getAttributes();
         l.height = -2;
         l.width = -2;
-        l.flags = 8519682;
-        l.dimAmount = 0.6f;
+//        l.flags = 8519682;
+//        l.dimAmount = 0.6f;
 //        l.type = 2;
 
         mWindowManager.addView(mDecor, l);
@@ -198,8 +207,8 @@ public class MockDialog implements DialogInterface, KeyEvent.Callback, Window.Ca
     }
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        return false;
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return onTouchEvent(ev);
     }
 
     @Override

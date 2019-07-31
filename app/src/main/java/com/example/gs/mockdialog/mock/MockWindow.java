@@ -6,14 +6,15 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.*;
-import android.widget.FrameLayout;
+
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class MockWindow extends Window {
     private MockDecorView mDecor;
     private LayoutInflater mLayoutInflater;
     private int mTheme = -1;
+    private boolean mCloseOnTouchOutside;
 
     public MockWindow(Context context) {
         super(context);
@@ -200,7 +201,38 @@ public class MockWindow extends Window {
         } else {
             mDecor.setWindow(this);
         }
+        generateLayout(mDecor);
     }
+    public void setCloseOnTouchOutside(boolean close) {
+        mCloseOnTouchOutside = close;
+    }
+
+    public boolean shouldCloseOnTouch(Context context, MotionEvent event) {
+        final boolean isOutside =
+                event.getAction() == MotionEvent.ACTION_DOWN && isOutOfBounds(context, event)
+                        || event.getAction() == MotionEvent.ACTION_OUTSIDE;
+        if (mCloseOnTouchOutside && peekDecorView() != null && isOutside) {
+            return true;
+        }
+        return false;
+    }
+    private boolean isOutOfBounds(Context context, MotionEvent event) {
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        final int slop = ViewConfiguration.get(context).getScaledWindowTouchSlop();
+        final View decorView = getDecorView();
+        return (x < -slop) || (y < -slop)
+                || (x > (decorView.getWidth()+slop))
+                || (y > (decorView.getHeight()+slop));
+    }
+    private void generateLayout(MockDecorView decor) {
+//        TypedArray a = getWindowStyle(); //Content from style
+        WindowManager.LayoutParams params = getAttributes();
+        setLayout(WRAP_CONTENT, WRAP_CONTENT);
+        params.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        params.dimAmount =  0.5f;
+    }
+
     @SuppressLint("NewApi")
     protected MockDecorView generateDecor(int featureId) {
         // System process doesn't have application context and in that case we need to directly use
@@ -224,7 +256,7 @@ public class MockWindow extends Window {
     }
     @Override
     public View peekDecorView() {
-        return null;
+        return mDecor;
     }
 
     @Override
